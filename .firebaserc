@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "syn-todo": {
+      "hosting": {
+        "syn-todo": [
+          "syn-todo"
+        ]
+      }
+    }
+  }
+}
