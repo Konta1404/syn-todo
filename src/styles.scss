@@ -4,3 +4,14 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+.login__google-button {
+  svg {
+    margin-right: 8px;
+  }
+}
+
+.btn-flat {
+  margin-top: 16px !important;
+  width: 100%;
+}
