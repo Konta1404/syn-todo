@@ -62,7 +62,7 @@ export class TodoComponent implements OnInit {
   }
 
 
-  addNewTodo() {
+  addNewTodo():void {
 
     if (this.todoForm.invalid) {
       return;
@@ -73,6 +73,11 @@ export class TodoComponent implements OnInit {
       isComplete: false
     }
     this.todoService.createTodo(taskObject);
+    this.todoForm.reset();
+
+    Object.keys(this.todoForm.controls).forEach(key => {
+      this.todoForm.get(key).setErrors(null) ;
+    });
   }
 
   editTodo(task): void {
@@ -86,11 +91,11 @@ export class TodoComponent implements OnInit {
     });
   }
 
-  deleteTodo(task) {
+  deleteTodo(task): void {
     this.todoService.deleteTodo(task);
   }
 
-  updateTodo(task) {
+  updateTodo(task): void {
     this.todoService.updateTodo(task)
   }
 

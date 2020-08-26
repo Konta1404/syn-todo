@@ -6,16 +6,16 @@
       Add new task
     </mat-card-title>
     <mat-divider></mat-divider>
-    <form [formGroup]="todoForm" class="todo-form-wrapper__form">
-      <mat-form-field class="form-control">
+    <form [formGroup]="todoForm" (ngSubmit)="addNewTodo()"   class="todo-form-wrapper__form">
+      <mat-form-field class="form-control w-80">
         <mat-label>What do you want to do?</mat-label>
         <input matInput formControlName="task"/>
         <mat-error *ngIf="f.task.errors && f.task.errors.required">
           <strong>You mast enter task!</strong>
         </mat-error>
       </mat-form-field>
-      <button mat-mini-fab color="accent" (click)="addNewTodo()">
-        <mat-icon class="material-icons">add</mat-icon>
+      <button type="submit" mat-raised-button color="accent">
+        <mat-icon class="material-icons">add</mat-icon>Add
       </button>
     </form>
   </mat-card>
@@ -52,7 +52,7 @@
       <tr mat-header-row *matHeaderRowDef="columnDefs"></tr>
       <tr mat-row *matRowDef="let row; columns: columnDefs"></tr>
     </table>
-    <mat-paginator [length]="datasource.filteredData.length" [pageSize]="10" [pageSizeOptions]="[5,10,20]" showFirstLastButtons></mat-paginator>
+    <mat-paginator [length]="datasource.filteredData.length" [pageSize]="5" [pageSizeOptions]="[5,10,20]" showFirstLastButtons></mat-paginator>
   </mat-card>
   <mat-card *ngIf="todos && todos.length === 0 && !loading">
     <div class="warning-message">
