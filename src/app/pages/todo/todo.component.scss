@@ -18,6 +18,9 @@ table {
   &__form {
     margin-top: 40px;
   }
+  input {
+    width: 100%;
+  }
 }
 .warning-message {
   display: flex;

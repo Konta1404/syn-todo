@@ -15,10 +15,14 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import {MatDividerModule} from "@angular/material/divider";
 import {MatButtonModule} from "@angular/material/button";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatSortModule} from "@angular/material/sort";
+import { EditTodoDialogComponent } from './components/edit-todo-dialog/edit-todo-dialog.component';
+import {MatDialogModule} from "@angular/material/dialog";
 
 
 @NgModule({
-  declarations: [TodoComponent],
+  declarations: [TodoComponent, EditTodoDialogComponent],
   imports: [
     CommonModule,
     TodoRoutingModule,
@@ -27,6 +31,7 @@ import {MatButtonModule} from "@angular/material/button";
     FormsModule,
     MatFormFieldModule,
     MatPaginatorModule,
+    MatSortModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatCheckboxModule,
@@ -34,7 +39,9 @@ import {MatButtonModule} from "@angular/material/button";
     MatInputModule,
     MatDividerModule,
     MatButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatProgressBarModule
   ]
 })
 export class TodoModule { }

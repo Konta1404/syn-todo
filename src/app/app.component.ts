@@ -63,7 +63,6 @@ export class AppComponent implements OnInit {
   navigationInterceptor(event: RouterEvent) {
     this.isLoggedIn().pipe(
       tap(user => {
-        console.log(user);
         if (user) {
           this.showLogoutButton = true;
         } else {
