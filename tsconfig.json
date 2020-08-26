@@ -12,6 +12,9 @@
       "jasmine"
     ]
   },
+  "angularCompilerOptions": {
+    "debug": true
+  },
   "references": [
     {
       "path": "./tsconfig.app.json"

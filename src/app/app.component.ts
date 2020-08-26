@@ -8,9 +8,9 @@ import {
   NavigationError, Route
 } from '@angular/router';
 import {AngularFireAuth} from "@angular/fire/auth";
-import {ToolbarService} from "./core/services/toolbar-service/toolbar.service";
 import {MatDrawer} from "@angular/material/sidenav";
 import {MediaMatcher} from "@angular/cdk/layout";
+import {first, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-root',
@@ -22,13 +22,12 @@ import {MediaMatcher} from "@angular/cdk/layout";
 })
 export class AppComponent implements OnInit {
   title = 'syn-todo';
-
+  showLogoutButton: boolean = false;
   loading = true;
   @ViewChild('drawer') public drawer: MatDrawer;
 
   constructor(private router:Router,
               private auth: AngularFireAuth,
-              @Inject(ToolbarService) private toolbarService: ToolbarService,
               changeDetectorRef: ChangeDetectorRef, media: MediaMatcher) {
     this.router.events.subscribe((e: RouterEvent) => {
       this.navigationInterceptor(e);
@@ -39,19 +38,14 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.toolbarService.setDrawer(this.drawer);
+
+  }
+
+  isLoggedIn() {
+    return this.auth.authState.pipe(first())
   }
 
   mobileQuery: MediaQueryList;
-
-  fillerNav = Array.from({length: 50}, (_, i) => `Nav Item ${i + 1}`);
-
-  fillerContent = Array.from({length: 50}, () =>
-    `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-       labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-       laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-       voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-       cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`);
 
   private _mobileQueryListener: () => void;
 
@@ -66,11 +60,17 @@ export class AppComponent implements OnInit {
       .then(() => this.router.navigate(['login']));
   }
 
-  toggleDrawer() {
-    this.toolbarService.toggle();
-  }
-
   navigationInterceptor(event: RouterEvent) {
+    this.isLoggedIn().pipe(
+      tap(user => {
+        console.log(user);
+        if (user) {
+          this.showLogoutButton = true;
+        } else {
+          this.showLogoutButton = false;
+        }
+      })
+    ).subscribe()
 
     switch (event.constructor) {
       case NavigationStart: {
@@ -80,7 +80,9 @@ export class AppComponent implements OnInit {
       case NavigationEnd:
       case NavigationCancel:
       case NavigationError: {
-        this.loading = false;
+        setTimeout(()=> {
+          this.loading = false;
+        },2000)
         break;
       }
       default: {

@@ -22,7 +22,8 @@ const redirectToHomeWithLogin = (
 const routes: Routes = [
   { path: 'login', loadChildren: () => import('./pages/login/login.module').then(m => m.LoginModule), ...canActivate(redirectToHomeWithLogin) },
   { path: '', loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule), ...canActivate(redirectUnauthorizedToLogin) },
-  { path: 'register', loadChildren: () => import('./pages/register/register.module').then(m => m.RegisterModule) }
+  { path: 'register', loadChildren: () => import('./pages/register/register.module').then(m => m.RegisterModule), ...canActivate(redirectToHomeWithLogin) },
+  { path: 'todo', loadChildren: () => import('./pages/todo/todo.module').then(m => m.TodoModule), ...canActivate(redirectUnauthorizedToLogin) },
 ];
 
 @NgModule({

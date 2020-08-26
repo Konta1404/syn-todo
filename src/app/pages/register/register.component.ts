@@ -31,7 +31,7 @@ export class RegisterComponent implements OnInit {
   ngOnInit(): void {
     this.registerForm = this.fb.group({
       fullName: new FormControl('', Validators.required),
-      email: new FormControl('', Validators.required),
+      email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [
         Validators.required,
         Validators.minLength(6),
@@ -39,9 +39,7 @@ export class RegisterComponent implements OnInit {
     });
   }
 
-  onErrorCreate() {
-
-  }
+  get f() { return this.registerForm.controls};
 
   createUser() {
     const { email, password, fullName } = this.registerForm.value;
@@ -52,28 +50,7 @@ export class RegisterComponent implements OnInit {
         switchMap((user) => from(user.getIdToken(true)).pipe(mapTo(user))),
       )
       .subscribe(() => this.router.navigate(['']), (error) => {
-        console.log(error.code);
-        switch(error.code) {
-          case "auth/invalid-email":
-          case "auth/wrong-password":
-          case "auth/user-not-found":
-          {
-            this.registerForm.controls.email.hasError(error.code);
-            this.registerForm.controls.email.markAsDirty();
-            console.log(this.registerForm);
-            break;
-          }
-          {
-            this.registerForm.controls.password.hasError(error.code);
-          }
-          {
-            this.registerForm.controls.fullName.hasError(error.code);
-            break;
-          }
-        }
-        this.registerForm.controls.fullName.hasError(error.status);
-        this.registerForm.controls.email.hasError(error.status);
-        this.registerForm.controls.password.hasError(error.status);
+
       });
   }
 

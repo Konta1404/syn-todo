@@ -27,16 +27,20 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      email: new FormControl('', Validators.required),
-      password: new FormControl('', Validators.required),
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
   }
+
+  get f() { return this.loginForm.controls};
 
   onLogin() {
     const { email, password } = this.loginForm.value;
     this.auth
       .signInWithEmailAndPassword(email, password)
-      .then(() => this.router.navigate(['']));
+      .then(() => this.router.navigate(['']), (errorResponse)=>{
+        console.log(errorResponse)
+      });
   }
 
   onLoginWithGoogle() {
