@@ -1,10 +1,10 @@
 <div mat-dialog-content>
-  <mat-form-field>
+  <mat-form-field class="w-100">
     <mat-label>Edit description of this task</mat-label>
     <input matInput [(ngModel)]="data.description">
   </mat-form-field>
 </div>
-<div mat-dialog-actions>
+<div mat-dialog-actions class="dialog-action-buttons">
   <button mat-button mat-dialog-close (click)="onNoClick()">Cancel</button>
   <button mat-raised-button color="accent" [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </div>
