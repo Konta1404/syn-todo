@@ -5,7 +5,7 @@
     <mat-grid-list cols="2" rowHeight="100px">
       <mat-grid-tile>
         <div class="mat-grid-tile__position--left">
-          <span class="weather__temperature">{{ weather.current.temp }}<sup class="weather__celsius--fs">&#8451;</sup></span>
+          <span class="weather__temperature">{{ weather.current.temp | number: '1.0-0' }}<sup class="weather__celsius--fs">&#8451;</sup></span>
         </div>
       </mat-grid-tile>
       <mat-grid-tile>
@@ -31,7 +31,7 @@
           </mat-grid-tile>
           <mat-grid-tile class="right">
             <div class="mat-grid-tile__position--right">
-              <span>{{ item.temp.max }}&#176; / {{ item.temp.min }}&#176;</span>
+              <span>{{ item.temp.max | number: '1.0-0' }}&#176; / {{ item.temp.min | number: '1.0-0' }}&#176;</span>
             </div>
           </mat-grid-tile>
         </mat-grid-list>
