@@ -1,4 +1,5 @@
-<mat-card class="weather">
+<p *ngIf="error" role="status">{{ error }}</p>
+<mat-card class="weather" *ngIf="!error">
   <mat-card-title>Podgorica</mat-card-title>
   <mat-card-subtitle>{{ this.currentTime | date: 'EEEE, HH:mm'}}, <span>{{ weather.current.weather[0].description }}</span></mat-card-subtitle>
   <mat-card-content>
@@ -10,7 +11,7 @@
       </mat-grid-tile>
       <mat-grid-tile>
         <div class="mat-grid-tile__position--right">
-          <img src="http://openweathermap.org/img/wn/{{weather.current.weather[0].icon}}@2x.png" alt="">
+          <img src="https://openweathermap.org/img/wn/{{weather.current.weather[0].icon}}@2x.png" alt="">
         </div>
       </mat-grid-tile>
     </mat-grid-list>
@@ -26,7 +27,7 @@
           </mat-grid-tile>
           <mat-grid-tile class="right">
             <div class="mat-grid-tile__position--right">
-              <img src="http://openweathermap.org/img/wn/{{item.weather[0].icon}}.png" alt="">
+              <img src="https://openweathermap.org/img/wn/{{item.weather[0].icon}}.png" alt="">
             </div>
           </mat-grid-tile>
           <mat-grid-tile class="right">

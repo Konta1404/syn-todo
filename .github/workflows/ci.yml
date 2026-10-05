@@ -1,0 +1,26 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --openssl-legacy-provider
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run build -- --aot
+      - run: npm test -- --watch=false --browsers=ChromeHeadless
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+        working-directory: rules-tests
+      - run: npm test
+        working-directory: rules-tests

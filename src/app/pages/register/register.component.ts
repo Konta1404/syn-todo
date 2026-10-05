@@ -1,77 +1,41 @@
-import { AngularFireDatabase } from '@angular/fire/database';
 import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { from } from 'rxjs';
-import { switchMap, first, mapTo, take } from 'rxjs/operators';
 import { auth } from 'firebase/app';
 import 'firebase/auth';
 
-@Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
-})
+@Component({ selector: 'app-register', templateUrl: './register.component.html', styleUrls: ['./register.component.scss'] })
 export class RegisterComponent implements OnInit {
-
   registerForm: FormGroup;
-  constructor(
-    private fb: FormBuilder,
-    private auth: AngularFireAuth,
-    private router: Router,
-    private db: AngularFireDatabase,
-  ) {}
-
+  pending = false;
+  error = '';
+  constructor(private fb: FormBuilder, private auth: AngularFireAuth, private router: Router) {}
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      fullName: new FormControl('', Validators.required),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6),
-      ]),
+      fullName: ['', [Validators.required, Validators.pattern(/\S/)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
-
-  get f() { return this.registerForm.controls};
-
-  createUser() {
+  get f() { return this.registerForm.controls; }
+  private async register(action: () => Promise<unknown>): Promise<void> {
+    if (this.pending) { return; }
+    this.pending = true;
+    this.error = '';
+    try { await action(); await this.router.navigate(['']); }
+    catch { this.error = 'Registration failed. Please retry, or sign in if your account already exists.'; }
+    finally { this.pending = false; }
+  }
+  async createUser(): Promise<void> {
+    if (this.registerForm.invalid) { return; }
     const { email, password, fullName } = this.registerForm.value;
-    from(this.auth.createUserWithEmailAndPassword(email, password))
-      .pipe(
-        switchMap(({ user }) => this.metadataCreateWatcher(user)),
-        take(1),
-        switchMap((user) => from(user.getIdToken(true)).pipe(mapTo(user))),
-      )
-      .subscribe(() => this.router.navigate(['']), (error) => {
-
-      });
+    await this.register(async () => {
+      const result = await this.auth.createUserWithEmailAndPassword(email.trim(), password);
+      await result.user.updateProfile({ displayName: fullName.trim() });
+    });
   }
-
-  createUserViaGoogle() {
-    from(this.auth.signInWithPopup(new auth.GoogleAuthProvider()))
-      .pipe(
-        switchMap(({ user }) => this.metadataCreateWatcher(user)),
-        take(1),
-        switchMap((user) => from(user.getIdToken(true)).pipe(mapTo(user))),
-      )
-      .subscribe(() => this.router.navigate(['']), console.error);
+  async createUserViaGoogle(): Promise<void> {
+    await this.register(() => this.auth.signInWithPopup(new auth.GoogleAuthProvider()));
   }
-
-  private metadataCreateWatcher(user: firebase.User) {
-    return this.db
-      .object(`metadata/${user.uid}/refreshTime`)
-      .valueChanges()
-      .pipe(
-        first((refreshTime) => !!refreshTime),
-        mapTo(user)
-      );
-  }
-
 }

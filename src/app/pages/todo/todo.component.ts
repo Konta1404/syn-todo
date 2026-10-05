@@ -1,102 +1,95 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { TodoService } from "../../core/services/todo.service";
-import { Todo } from "../../models/todo.model";
-import { FormControl, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { MatPaginator } from "@angular/material/paginator";
-import { MatSort } from "@angular/material/sort";
-import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog } from "@angular/material/dialog";
-import { EditTodoDialogComponent } from "./components/edit-todo-dialog/edit-todo-dialog.component";
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TodoService } from '../../core/services/todo.service';
+import { Todo } from '../../models/todo.model';
+import { EditTodoDialogComponent } from './components/edit-todo-dialog/edit-todo-dialog.component';
 
 @Component({
   selector: 'app-todo',
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.scss']
 })
-export class TodoComponent implements OnInit {
-
-  todos: Todo[];
-  datasource: MatTableDataSource<Todo>
-  loading: boolean = false;
+export class TodoComponent implements OnInit, OnDestroy {
+  todos: Todo[] = [];
+  datasource = new MatTableDataSource<Todo>([]);
+  loading = false;
+  saving = false;
+  error = '';
   todoForm: FormGroup;
-  columnDefs: string[] = ['done', 'id', 'description', 'remove'];
+  columnDefs = ['done', 'id', 'description', 'remove'];
+  private destroyed = new Subject<void>();
 
   @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
-    if (this.datasource) {
-      this.datasource.paginator = paginator;
-    }
+    this.datasource.paginator = paginator;
   }
+  @ViewChild(MatSort) set matSort(sort: MatSort) { this.datasource.sort = sort; }
 
-  @ViewChild(MatSort) set matSort(sort: MatSort) {
-    if (this.datasource) {
-      this.datasource.sort = sort;
-    }
-  }
-
-  constructor(private todoService: TodoService, private fb: FormBuilder, public dialog: MatDialog) { }
+  constructor(private todoService: TodoService, private fb: FormBuilder, public dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.todoForm = this.fb.group({
-      task: new FormControl('', Validators.required),
-    });
-    this.getTodos();
-  }
-
-  get f () { return this.todoForm.controls }
-
-  getTodos() {
+    this.todoForm = this.fb.group({ task: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(500)]] });
     this.loading = true;
-    this.todoService.getTodos()
-      .subscribe(data => {
-        // Couldn't use firebase
-        this.loading = false;
-        this.todos = data.map(e => {
-          return {
-            id: e.payload.doc.id,
-            description: e.payload.doc.data()['description'],
-            isComplete: e.payload.doc.data()['isComplete'],
-          } as Todo;
-        })
-        this.datasource = new MatTableDataSource(this.todos)
-      });
+    this.todoService.getTodos().pipe(takeUntil(this.destroyed)).subscribe(todos => {
+      this.todos = todos;
+      this.datasource.data = todos;
+      this.loading = false;
+    }, () => {
+      this.loading = false;
+      this.error = 'Tasks could not be loaded. Please reload to retry.';
+    });
   }
 
+  get f() { return this.todoForm.controls; }
 
-  addNewTodo():void {
-
-    if (this.todoForm.invalid) {
-      return;
+  private async write(action: () => Promise<void>): Promise<boolean> {
+    if (this.saving) { return false; }
+    this.saving = true;
+    this.error = '';
+    try {
+      await action();
+      return true;
+    } catch {
+      this.error = 'The change could not be saved. Your input has been kept; please retry.';
+      return false;
+    } finally {
+      this.saving = false;
     }
+  }
 
-    let taskObject: Todo = {
-      description: this.todoForm.get('task').value,
-      isComplete: false
+  async addNewTodo(): Promise<void> {
+    if (this.todoForm.invalid || this.saving) { return; }
+    const description = this.todoForm.value.task.trim();
+    if (await this.write(() => this.todoService.createTodo({ description, isComplete: false }))) {
+      this.todoForm.reset({ task: '' });
     }
-    this.todoService.createTodo(taskObject);
-    this.todoForm.reset();
+  }
 
-    Object.keys(this.todoForm.controls).forEach(key => {
-      this.todoForm.get(key).setErrors(null) ;
+  editTodo(task: Todo): void {
+    const ref = this.dialog.open(EditTodoDialogComponent, { width: '500px', data: { ...task } });
+    ref.afterClosed().pipe(takeUntil(this.destroyed)).subscribe((result: Todo | undefined) => {
+      if (result) { this.updateTodo(result); }
     });
   }
 
-  editTodo(task): void {
-    const dialogRef = this.dialog.open(EditTodoDialogComponent, {
-      width: '500px',
-      data: Object.assign({}, task)
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      this.updateTodo(result)
-    });
+  async deleteTodo(id: string): Promise<void> {
+    await this.write(() => this.todoService.deleteTodo(id));
   }
 
-  deleteTodo(task): void {
-    this.todoService.deleteTodo(task);
+  async updateTodo(task: Todo): Promise<void> {
+    if (!(await this.write(() => this.todoService.updateTodo(task)))) { this.editTodo(task); }
   }
 
-  updateTodo(task): void {
-    this.todoService.updateTodo(task)
+  async toggleTodo(task: Todo, isComplete: boolean): Promise<void> {
+    await this.write(() => this.todoService.updateTodo({ ...task, isComplete }));
+    // Re-render authoritative snapshot data after a failed write as well.
+    this.datasource.data = [...this.todos];
   }
 
+  ngOnDestroy(): void { this.destroyed.next(); this.destroyed.complete(); }
 }

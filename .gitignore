@@ -44,3 +44,9 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Local verification outputs
+coverage/
+*.tsbuildinfo
+rules-tests/node_modules/
+*-debug.log

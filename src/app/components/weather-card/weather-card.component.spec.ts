@@ -1,25 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { throwError } from 'rxjs';
 import { WeatherCardComponent } from './weather-card.component';
-
-describe('WeatherCardComponent', () => {
-  let component: WeatherCardComponent;
-  let fixture: ComponentFixture<WeatherCardComponent>;
-
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ WeatherCardComponent ]
-    })
-    .compileComponents();
-  }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(WeatherCardComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+it('shows unavailable status after a weather failure', () => {
+  const component = new WeatherCardComponent({ getWeather: () => throwError(new Error('offline')) } as any);
+  component.ngOnInit(); expect(component.error).toBeTruthy();
 });

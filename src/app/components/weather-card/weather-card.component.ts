@@ -24,6 +24,7 @@ export class WeatherCardComponent implements OnInit {
     daily: {},
     timezone_offset: 0
   };
+  error = '';
   panelOpenState: boolean = false;
   currentTime: Date =  new Date();
 
@@ -36,7 +37,7 @@ export class WeatherCardComponent implements OnInit {
 
   getWeatherData() {
     this.weatherService.getWeather()
-      .subscribe( response => this.weather = response);
+      .subscribe(response => this.weather = response, () => this.error = 'Weather is unavailable.');
   }
 
 }

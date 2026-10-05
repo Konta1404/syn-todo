@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { Component } from '@angular/core';
+@Component({ selector: 'app-weather-card', template: '' })
+class WeatherStub {}
+
 import { HomeComponent } from './home.component';
 
 describe('HomeComponent', () => {
@@ -8,7 +12,7 @@ describe('HomeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HomeComponent ]
+      declarations: [ HomeComponent, WeatherStub ]
     })
     .compileComponents();
   }));

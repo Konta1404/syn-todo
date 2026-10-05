@@ -15,7 +15,6 @@ export class EditTodoDialogComponent {
   }
 
   onNoClick(): void {
-    console.log(this.initialValue)
-    this.dialogRef.close(this.initialValue);
+    this.dialogRef.close();
   }
 }

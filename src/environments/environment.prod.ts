@@ -1,5 +1,7 @@
 export const environment = {
   production: true,
+  // Public Firebase client config; authorization is enforced by database rules.
+  weatherUrl: '', // Optional same-origin proxy returning the Weather response shape.
   firebaseConfig: {
     apiKey: "AIzaSyCd1Ajf21cT3HAaHHvFlHTtZ6nC1Ku4cJM",
     authDomain: "syn-todo.firebaseapp.com",
